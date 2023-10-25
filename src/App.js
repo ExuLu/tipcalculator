@@ -2,89 +2,88 @@ import { useState } from 'react';
 import './styles.css';
 
 export default function App() {
-  return <Calculator />;
+  return <TipCalculator />;
 }
 
-function Calculator() {
-  const [sumBill, setSumBill] = useState(0);
-  const [myPercents, setMyPercents] = useState(0);
-  const [frPercents, setFrPercents] = useState(0);
+function TipCalculator() {
+  const [bill, setBill] = useState('');
+  const [percentage1, setPercentage1] = useState(0);
+  const [percentage2, setPercentage2] = useState(0);
 
-  // const [allPercents, setAllPersents] = useState([]);
+  const tip = ((percentage1 + percentage2) / 2 / 100) * bill;
+  const total = tip + bill;
 
-  // function handleCahnge(obj) {
-  //   setAllPersents((ps) =>
-  //     ps.map((p) =>
-  //       obj.id === p.id
-  //         ? {
-  //             ...p,
-  //             value: obj.value,
-  //           }
-  //         : {
-  //             value: obj.value,
-  //             id: obj.id,
-  //           }
-  //     )
-  //   );
-  // }
-
-  function handleCahnge(value, id) {
-    id === 1 ? setMyPercents(value) : setFrPercents(value);
+  function handleReset() {
+    setBill('');
+    setPercentage1(0);
+    setPercentage2(0);
   }
-
-  function reset() {
-    setSumBill(0);
-    setMyPercents(0);
-    setFrPercents(0);
-  }
-
-  const percents = ((myPercents + frPercents) / 100) * sumBill;
-  const total = sumBill + percents;
 
   return (
     <div>
-      <p>
-        How much was the bill?
-        <input
-          value={sumBill}
-          onChange={(e) => setSumBill(+e.target.value)}
-          type='textarea'
-        ></input>
-      </p>
-      <Percentage id={1} onHandleChange={handleCahnge} perc={myPercents}>
+      <BillInput bill={bill} onSetBill={setBill} />
+      <SelectPercentage
+        percentage={percentage1}
+        onSetPercentage={setPercentage1}
+      >
         How did you like the service?
-      </Percentage>
-      <Percentage id={2} onHandleChange={handleCahnge} perc={frPercents}>
+      </SelectPercentage>
+      <SelectPercentage
+        percentage={percentage2}
+        onSetPercentage={setPercentage2}
+      >
         How did your friend like the service?
-      </Percentage>
-      {sumBill !== 0 && (
-        <>
-          <h3>
-            You pay ${total} (${sumBill} + ${percents})
-          </h3>
+      </SelectPercentage>
 
-          <button onClick={reset}>Reset</button>
+      {bill > 0 && (
+        <>
+          <Output bill={bill} tip={tip} total={total} />
+          <Reset onReset={handleReset} />{' '}
         </>
       )}
     </div>
   );
 }
 
-function Percentage({ children, perc, onHandleChange, id }) {
+function BillInput({ bill, onSetBill }) {
   return (
-    <>
-      <p>
-        {children}
-        <select
-          value={perc}
-          onChange={(e) => onHandleChange(+e.target.value, id)}
-        >
-          <option value={0}>Dissatisfied (0%)</option>
-          <option value={5}>It was okay (5%)</option>
-          <option value={10}>It was good (10%)</option>
-          <option value={20}>Absolutely amazing! (20%)</option>
-        </select>
-      </p>
-    </>
+    <div>
+      <label>How much was the bill?</label>
+      <input
+        value={bill}
+        onChange={(e) => onSetBill(Number(e.target.value))}
+        type='text'
+        placeholder='Bill value'
+      ></input>
+    </div>
   );
+}
+
+function SelectPercentage({ children, percentage, onSetPercentage }) {
+  return (
+    <div>
+      <label>{children}</label>
+      <select
+        value={percentage}
+        onChange={(e) => onSetPercentage(Number(e.target.value))}
+      >
+        <option value={0}>Dissatisfied (0%)</option>
+        <option value={5}>It was okay (5%)</option>
+        <option value={10}>It was good (10%)</option>
+        <option value={20}>Absolutely amazing! (20%)</option>
+      </select>
+    </div>
+  );
+}
+
+function Output({ bill, total, tip }) {
+  return (
+    <h3>
+      You pay ${total} (${bill} + ${tip} tip)
+    </h3>
+  );
+}
+
+function Reset({ onReset }) {
+  return <button onClick={onReset}>Reset</button>;
 }
